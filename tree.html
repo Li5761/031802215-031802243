@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>师门树</title>
+    <script src="min.js" type="text/javascript"></script>
+    <script src="echarts.min.js" type="text/javascript"></script>
+</head>
+
+
+<script type="text/javascript">
+
+function getvalue(){
+
+    var tdt=Array();
+    var m,n,k,l=0;
+    var str=$("#Textarea").val();
+    var astr=Array();
+    astr=str.split("\n");
+    var sk = Array();
+
+    for(i=0;i<astr.length;i++)
+    {
+        for(j=i+1;j<astr.length;j++)
+            if(astr[j]==''&&astr[j-1]=='')
+                break;
+        var dc=[],ma=[],bc=[];
+        for(k=i;k<j;k++)
+        {
+            if(astr[k]=='')
+            continue;
+            var d=0,m=0,b=0;
+            var item=astr[k].split('：');
+            if(!(astr[k].includes("导师")||astr[k].includes("博士生")||astr[k].includes("硕士生")||astr[k].includes("本科生")))
+            {
+                for(var z = 1;z<item.length;z++)
+                    sk[item[0]]=item[z];
+            }
+            else{
+            if(k==i)
+            {
+                tdt.push({"name":"",
+                                "children":[
+                                    {"name":"博士生",
+                                    "children":[]},
+                                    {"name":"硕士生","children":[]},
+                                    {"name":"本科生","children":[]}]
+                });
+            }
+            if(item[0].includes("导师")){
+                tdt[l]["name"]=item[1];
+            }
+            else if(astr[k].includes("博士生")){
+                for(d=0;d<dc.length;d++){
+                    if(astr[k].slice(0,5)==dc[d]["name"]){
+                        var std=item[1];
+                        var stds=item[1].split("、");
+                        for(var x=0;x<stds.length;x++){
+                            var stdName=stds[x];
+                            std={"name":stdName,"children":[]};
+                            dc[d]["children"].push(std);
+                        }
+                        break;
+                    }
+                }
+                if(d==dc.length){
+                    var std={"name":astr[k].slice(0,5),"children":[]};
+                    dc.push(std);
+                    std=item[1].split("、");
+                    for(var x=0;x<std.length;x++){
+                        var s={"name":std[x],"children":[]};
+                        dc[d]["children"].push(s);
+                    }
+                }
+            }
+            else if(item[0].includes("硕士生")){
+                for(d=0;d<ma.length;d++){
+                    if(astr[k].slice(0,5)==ma[d]["name"]){
+                        var std=item[1];
+                        var stds=item[1].split("、");
+                        for(var x=0;x<stds.length;x++){
+                            var stdName=stds[x];
+                            std={"name":stdName,"children":[]};
+                            ma[d]["children"].push(std);
+                        }
+                        break;
+                    }
+                }
+                if(d==ma.length){
+                    var std={"name":astr[k].slice(0,5),"children":[]};
+                    ma.push(std);
+                    std=item[1].split("、");
+                    for(var x=0;x<std.length;x++){
+                        var s={"name":std[x],"children":[]};
+                        ma[d]["children"].push(s);
+                    }
+                }
+            }
+            else{
+                for(d=0;d<bc.length;d++){
+                    if(astr[k].slice(0,5)==bc[d]["name"]){
+                        var std=item[1];
+                        var stds=item[1].split("、");
+                        for(var x=0;x<stds.length;x++){
+                            var stdName=stds[x];
+                            std={"name":stdName,"children":[]};
+                            bc[d]["children"].push(std);
+                        }
+                        break;
+                    }
+                }
+                if(d==bc.length){
+                    var std={"name":astr[k].slice(0,5),"children":[]};
+                    bc.push(std);
+                    std=item[1].split("、");
+                    for(var x=0;x<std.length;x++){
+                        var s={"name":std[x],"children":[]};
+                        bc[d]["children"].push(s);
+                    }}}}}
+        tdt[l]["children"][0]["children"]=dc;
+        tdt[l]["children"][1]["children"]=ma;
+        tdt[l]["children"][2]["children"]=bc;
+        l=l+1;
+        i=j;
+    }
+
+    for(i=0;i<tdt.length;i++)
+    {
+        var data=[];
+        data[0]=tdt[i];
+        var x=i.toString();
+        if(document.getElementById(x)!=null)
+            continue;
+        $("body").append("<div id='x' style=\"width:100px0;height:900px;\"></div>");
+        $("#x").attr('id',x);
+        data[0]=tdt[i];
+        drawTree(data,x,sk);
+    }
+}
+
+
+    function drawTree(tdt,x,sk) {
+        var  myChart = echarts.init(document.getElementById(x));
+        var option={
+title : {
+  show : 'true',
+  text : '这是创建完成的师门树:',
+},
+            tooltip : {
+                show : 'true' ,
+                trigger : 'item'
+            },
+            series : {
+                type : 'tree',
+                data : tdt,
+                orient : 'vertical',
+                top :'7%',
+                symbolSize : 20,
+                label : {
+                      position : 'top',
+                      fontSize: 30,
+                      color:"black"
+              },
+              leaves : {
+                  label : {
+                      position : 'bottom',
+                  }
+              },
+                initialTreeDepth : 6
+            }
+        }
+        myChart.setOption(option);
+        function params() {
+            var name = params.data.name;
+            var value = params.data.value;
+            if(sk[name]!=null)
+                alert(sk[name]);
+        };
+        myChart.on('click', params());
+    }
+</script>
+<body>
+        <textarea id="Textarea" placeholder="请输入学术家族树的文本" style="resize:none;width:300px;height:200px"></textarea>
+      </br>
+        <input type="button" value=创建师门树 onclick="getvalue()"/>
+      </br></br></br></br>
+</body>
+</html>
